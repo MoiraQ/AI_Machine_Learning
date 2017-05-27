@@ -13,6 +13,8 @@ import numpy as np
 import os
 import csv
 
+from sklearn import svm
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -127,10 +129,39 @@ def build_SVM_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
+    
+    svc = svm.SVC(kernel='linear')
+    
+    svc.fit(X_training, y_training)
+    
+    return svc
+    
+    
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+def split_training_data(X, y):
+    n = X.shape[0]
+
+    splitPoint = int(n*0.9)
+    XTrain, XTest = X[:splitPoint], X[splitPoint:]
+    yTrain, yTest = y[:splitPoint], y[splitPoint:]
+    
+    svc = build_SVM_classifier(XTrain, yTrain)
+           
+    return svc.score(XTest, yTest)
+    
+
+def random_permutation(X, y):    
+    n = X.shape[0]
+    p = np.random.permutation(n)
+    
+    X, y = X[p], y[p]
+    
+    return X, y
+
 
 if __name__ == "__main__":
     pass
@@ -144,7 +175,10 @@ if __name__ == "__main__":
     script_dir = os.path.split(script_path)[0]
     rel_path = "medical_records.data"
     abs_file_path = os.path.join(script_dir, rel_path)
-    print(prepare_dataset(abs_file_path))
+    
+    X, y = prepare_dataset(abs_file_path)
+    X, y = random_permutation(X, y)
+    print(split_training_data(X, y))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
