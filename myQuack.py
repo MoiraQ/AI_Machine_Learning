@@ -46,21 +46,23 @@ def prepare_dataset(dataset_path):
     @return
 	X,y
     '''
-    i = 0
-    X = np.empty(shape=[0,2],dtype=str)
-    y = np.empty(shape=[0,1],dtype=bool)
 
+    # Declare Numpy Arrays
+    X = np.empty(shape=[0,1],dtype=float)
+    y = np.empty(shape=[1],dtype=bool)    
+    
     # Read in Data with CSV Reader
     with open(dataset_path, newline='') as csvfile:
+        # Go through each row and buily y numpy array
         patients = csv.reader(csvfile,delimiter=',')
         for row in patients:
-            data = ', '.join(row)
-#            X = np.append(X, [[i, j]], axis=0)
-            X = np.append(X, [[i,data]], axis=0)
-            y = np.append(y, [[int(row[1] == 'M')]], axis=0)
-            i += 1
-                  
-    return X,y 
+            numcols=len(row[2:])
+            y = np.append(y, [int(row[1] == 'M')], axis=0)
+
+    # Create X numpy array
+    X = np.genfromtxt(dataset_path,delimiter=',',usecols=range(2,numcols+2))
+
+    return X,y
 
     raise NotImplementedError()
 
