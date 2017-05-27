@@ -13,7 +13,7 @@ import numpy as np
 import os
 import csv
 
-from sklearn import svm
+from sklearn import svm, neighbors
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -113,7 +113,12 @@ def build_NN_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
+      
+    clf = neighbors.KNeighborsClassifier()
+    clf.fit(X_training, y_training)
+    
+    return clf
+    
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -130,11 +135,10 @@ def build_SVM_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
-    svc = svm.SVC(kernel='linear')
+    clf = svm.LinearSVC()    
+    clf.fit(X_training, y_training)
     
-    svc.fit(X_training, y_training)
-    
-    return svc
+    return clf
     
     
     raise NotImplementedError()
@@ -142,16 +146,20 @@ def build_SVM_classifier(X_training, y_training):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def split_training_data(X, y):
+def split_training_data(X, y):    
     n = X.shape[0]
-
     splitPoint = int(n*0.9)
+    
     XTrain, XTest = X[:splitPoint], X[splitPoint:]
     yTrain, yTest = y[:splitPoint], y[splitPoint:]
     
-    svc = build_SVM_classifier(XTrain, yTrain)
-           
-    return svc.score(XTest, yTest)
+    #np.set_printoptions(threshold=np.inf)
+    
+    svc = build_SVM_classifier(XTrain, yTrain)   
+    print("SVC", svc.score(XTest, yTest)) 
+        
+    knn = build_NN_classifier(XTrain, yTrain)
+    print("KNN", knn.score(XTest, yTest))
     
 
 def random_permutation(X, y):    
@@ -178,7 +186,7 @@ if __name__ == "__main__":
     
     X, y = prepare_dataset(abs_file_path)
     X, y = random_permutation(X, y)
-    print(split_training_data(X, y))
+    split_training_data(X, y)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
