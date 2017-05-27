@@ -51,11 +51,11 @@ def prepare_dataset(dataset_path):
 
     # Declare Numpy Arrays
     X = np.empty(shape=[0,1],dtype=float)
-    y = np.empty(shape=[1],dtype=bool)    
+    y = np.empty(shape=[0],dtype=bool)    
     
     # Read in Data with CSV Reader
     with open(dataset_path, newline='') as csvfile:
-        # Go through each row and buily y numpy array
+        # Go through each row and build y numpy array
         patients = csv.reader(csvfile,delimiter=',')
         for row in patients:
             numcols=len(row[2:])
