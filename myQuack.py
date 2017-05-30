@@ -13,7 +13,10 @@ import numpy as np
 import os
 import csv
 
+import matplotlib.pyplot as plt
 from sklearn import svm, neighbors
+
+from sklearn.cross_validation import cross_val_score
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -114,9 +117,29 @@ def build_NN_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
       
-    clf = neighbors.KNeighborsClassifier()
-    clf.fit(X_training, y_training)
+    max_tests = 60
+    k_range = range(1, max_tests)
     
+    k_scores = []
+    best_k = 1
+    
+    for k in k_range:
+        clf = neighbors.KNeighborsClassifier(k)
+        score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
+        if k > 1 and score >= k_scores[best_k-1]:
+            best_k = k
+            
+        k_scores.append(score)
+                    
+    """
+    plt.plot(k_range, k_scores)
+    plt.xlabel("k for KNN")
+    plt.ylabel("accuracy")
+    plt.show()
+    """
+    
+    clf = neighbors.KNeighborsClassifier(best_k)
+    clf.fit(X_training, y_training)
     return clf
     
     raise NotImplementedError()
@@ -135,32 +158,39 @@ def build_SVM_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
-    clf = svm.LinearSVC()    
-    clf.fit(X_training, y_training)
+    max_tests = 60
+    p_range = range(0, max_tests)
     
+    best_p_score = 0
+    best_p_index = 0
+    
+    int count = 0
+    
+    for p in p_range:
+        clf = svm.LinearSVC(C = p)
+        score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
+        if p > 1 and score >= p_scores[best_p_index - 1]:
+            best_p = p
+            
+        p_scores.append(score)
+        count += 1
+                    
+    print (best_p)
+        
+    plt.plot(p_range, p_scores)
+    plt.xlabel("penalty for SVC")
+    plt.ylabel("accuracy")
+    plt.show()
+    
+    
+    clf = svm.LinearSVC(C = p_range[best_p_index])
+    clf.fit(X_training, y_training)
     return clf
     
     
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-def split_training_data(X, y):    
-    n = X.shape[0]
-    splitPoint = int(n*0.9)
-    
-    XTrain, XTest = X[:splitPoint], X[splitPoint:]
-    yTrain, yTest = y[:splitPoint], y[splitPoint:]
-    
-    #np.set_printoptions(threshold=np.inf)
-    
-    svc = build_SVM_classifier(XTrain, yTrain)   
-    print("SVC", svc.score(XTest, yTest)) 
-        
-    knn = build_NN_classifier(XTrain, yTrain)
-    print("KNN", knn.score(XTest, yTest))
-    
 
 def random_permutation(X, y):    
     n = X.shape[0]
@@ -170,6 +200,13 @@ def random_permutation(X, y):
     
     return X, y
 
+    
+def find_file():
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.split(script_path)[0]
+    rel_path = "medical_records.data"
+    return os.path.join(script_dir, rel_path)
+    
 
 if __name__ == "__main__":
     pass
@@ -178,15 +215,15 @@ if __name__ == "__main__":
     # my_team
     print(my_team())
     
-    # prepare_dataset
-    script_path = os.path.abspath(__file__)
-    script_dir = os.path.split(script_path)[0]
-    rel_path = "medical_records.data"
-    abs_file_path = os.path.join(script_dir, rel_path)
-    
-    X, y = prepare_dataset(abs_file_path)
+    # prepare_dataset    
+    X, y = prepare_dataset(find_file())   
     X, y = random_permutation(X, y)
-    split_training_data(X, y)
+    
+    #knn_clf = build_NN_classifier(X, y)
+    svm_clf = build_SVM_classifier(X, y)
+    
+    knn_score = cross_val_score(knn_clf, X, y, cv = 10).mean()   
+    print (knn_score)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
