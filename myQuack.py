@@ -15,6 +15,9 @@ import csv
 
 import matplotlib.pyplot as plt
 from sklearn import svm, neighbors
+from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
+from sklearn.tree import DecisionTreeClassifier
+
 
 from sklearn.model_selection import cross_val_score
 
@@ -84,7 +87,42 @@ def build_NB_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
+    
+    '''
+    clfG = GaussianNB()
+    clfM = MultinomialNB()
+    clfB = BernoulliNB()
+    
+    G_scores = []
+    M_scores = []
+    B_scores = []
+
+    iterations = 20
+    
+    for i in range(iterations):
+        X_training, y_training = random_permutation(X_training, y_training)
+        G_scores.append(cross_val_score(clfG, X_training, y_training, scoring="accuracy", cv = 10).mean())
+        M_scores.append(cross_val_score(clfM, X_training, y_training, scoring="accuracy", cv = 10).mean())
+        B_scores.append(cross_val_score(clfB, X_training, y_training, scoring="accuracy", cv = 10).mean())
+    
+    
+    
+    
+    #print ("\nGaussian:", scoreG, "\nMultinomial:", scoreM, "\nBernoulli:", scoreB, "\n")
+    
+    
+    plt.plot(range(iterations), G_scores, 'r', range(iterations), M_scores, 'g', range(iterations), B_scores, 'b')
+    plt.xlabel("k for KNN")
+    plt.ylabel("accuracy")
+    plt.show()
+    '''
+    
+    
+    clfG = GaussianNB()
+
+    clfG.fit(X_training, y_training)    
+    return clfG
+    
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -162,40 +200,40 @@ def build_SVM_classifier(X_training, y_training):
     
     print ("--Starting SVC--")
     
-    max_tests = 500
-    multiplier = 100
-    p_range = range(1, max_tests)
+    num_tests = 200
+    multiplier = 0.5
+    c_range = range(1, num_tests)
     
-    p_scores = []
-    best_p = 1
+    c_scores = []
+    best_c = 1
     
-    progress_counter = 100
+    progress_counter = 20
     
-    # Finds the best penalty value for the SVC based on the inputted data
-    for p in p_range:
-        clf = svm.LinearSVC(C=float(p * multiplier))
+    # Finds the best C value for the SVC based on the inputted data
+    for c in c_range:
+        clf = svm.LinearSVC(C=float(c * multiplier))
         score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
-        p_scores.append(score)
-        if score >= p_scores[best_p-1]:
-            best_p = p            
+        c_scores.append(score)
+        if score >= c_scores[best_c-1]:
+            best_c = c            
         
-        if p % progress_counter == 0:
-            print (p, "tests out of", max_tests, "complete.")
+        if c % progress_counter == 0:
+            print (str((c / num_tests) * 100) + "% complete.",)
     
 
         
-
-    print (best_p * multiplier)
+    
+    print (best_c * multiplier)
         
-    plt.plot(range(multiplier, max_tests * multiplier, multiplier), p_scores)
-    plt.xlabel("penalty for SVC")
+    plt.plot(np.arange(multiplier, num_tests * multiplier, multiplier), c_scores)
+    plt.xlabel("C for SVC")
     plt.ylabel("accuracy")
     plt.show()
     
     
     # Note the value generated from this clf may not be the best value found above, due to random generation
-    clf = svm.LinearSVC()
-    clf.fit(X_training, y_training) 
+    clf = svm.LinearSVC(C=best_c * multiplier)
+    clf.fit(X_training, y_training)     
     
     print ("--Finished SVC--")
     
@@ -231,7 +269,13 @@ def do_svm(X, y):
 def do_knn(X, y):
     knn_clf = build_NN_classifier(X, y)
     knn_score = cross_val_score(knn_clf, X, y, scoring="accuracy", cv = 10).mean()  
-    print (knn_score)   
+    print (knn_score)
+    
+
+def do_gnb(X, y):
+    gnb_clf = build_NB_classifier(X, y)
+    gnb_score = cross_val_score(gnb_clf, X, y, scoring="accuracy", cv = 10).mean()  
+    print (gnb_score)
 
     
 if __name__ == "__main__":
@@ -247,6 +291,7 @@ if __name__ == "__main__":
     
     do_svm(X, y)
     #do_knn(X, y)
+    #do_gnb(X, y)
     
 
 
