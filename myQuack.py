@@ -16,7 +16,7 @@ import csv
 import matplotlib.pyplot as plt
 from sklearn import svm, neighbors
 
-from sklearn.cross_validation import cross_val_score
+from sklearn.model_selection import cross_val_score
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -117,12 +117,14 @@ def build_NN_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
       
+    
     max_tests = 60
     k_range = range(1, max_tests)
     
     k_scores = []
     best_k = 1
     
+    # Finds the best K value for the KNN classifier based on the inputted data
     for k in k_range:
         clf = neighbors.KNeighborsClassifier(k)
         score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
@@ -131,14 +133,14 @@ def build_NN_classifier(X_training, y_training):
             
         k_scores.append(score)
                     
-    """
+    
     plt.plot(k_range, k_scores)
     plt.xlabel("k for KNN")
     plt.ylabel("accuracy")
     plt.show()
-    """
     
-    clf = neighbors.KNeighborsClassifier(best_k)
+    
+    clf = neighbors.KNeighborsClassifier(best_k-1)
     clf.fit(X_training, y_training)
     return clf
     
@@ -158,33 +160,45 @@ def build_SVM_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
-    max_tests = 60
-    p_range = range(0, max_tests)
+    print ("--Starting SVC--")
     
-    best_p_score = 0
-    best_p_index = 0
+    max_tests = 500
+    multiplier = 100
+    p_range = range(1, max_tests)
     
-    int count = 0
+    p_scores = []
+    best_p = 1
     
+    progress_counter = 100
+    
+    # Finds the best penalty value for the SVC based on the inputted data
     for p in p_range:
-        clf = svm.LinearSVC(C = p)
+        clf = svm.LinearSVC(C=float(p * multiplier))
         score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
-        if p > 1 and score >= p_scores[best_p_index - 1]:
-            best_p = p
-            
         p_scores.append(score)
-        count += 1
-                    
-    print (best_p)
+        if score >= p_scores[best_p-1]:
+            best_p = p            
         
-    plt.plot(p_range, p_scores)
+        if p % progress_counter == 0:
+            print (p, "tests out of", max_tests, "complete.")
+    
+
+        
+
+    print (best_p * multiplier)
+        
+    plt.plot(range(multiplier, max_tests * multiplier, multiplier), p_scores)
     plt.xlabel("penalty for SVC")
     plt.ylabel("accuracy")
     plt.show()
     
     
-    clf = svm.LinearSVC(C = p_range[best_p_index])
-    clf.fit(X_training, y_training)
+    # Note the value generated from this clf may not be the best value found above, due to random generation
+    clf = svm.LinearSVC()
+    clf.fit(X_training, y_training) 
+    
+    print ("--Finished SVC--")
+    
     return clf
     
     
@@ -208,6 +222,18 @@ def find_file():
     return os.path.join(script_dir, rel_path)
     
 
+def do_svm(X, y):
+    svm_clf = build_SVM_classifier(X, y)
+    svm_score = cross_val_score(svm_clf, X, y, scoring="accuracy", cv = 10).mean()   
+    print (svm_score)
+
+
+def do_knn(X, y):
+    knn_clf = build_NN_classifier(X, y)
+    knn_score = cross_val_score(knn_clf, X, y, scoring="accuracy", cv = 10).mean()  
+    print (knn_score)   
+
+    
 if __name__ == "__main__":
     pass
     # call your functions here
@@ -219,11 +245,10 @@ if __name__ == "__main__":
     X, y = prepare_dataset(find_file())   
     X, y = random_permutation(X, y)
     
-    #knn_clf = build_NN_classifier(X, y)
-    svm_clf = build_SVM_classifier(X, y)
+    do_svm(X, y)
+    #do_knn(X, y)
     
-    knn_score = cross_val_score(knn_clf, X, y, cv = 10).mean()   
-    print (knn_score)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
