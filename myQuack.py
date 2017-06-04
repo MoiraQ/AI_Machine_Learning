@@ -88,6 +88,7 @@ def build_NB_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
+    # Initialise classifiers and arrays
     clfG = GaussianNB()
     clfM = MultinomialNB()
     clfB = BernoulliNB()
@@ -98,6 +99,7 @@ def build_NB_classifier(X_training, y_training):
 
     iterations = 20
     
+    # test a number of random permutations fo the inputted data
     for i in range(iterations):
         X, y = random_permutation(X_training, y_training)
         G_scores.append(cross_val_score(clfG, X, y, scoring="accuracy", cv = 10).mean())
@@ -105,12 +107,15 @@ def build_NB_classifier(X_training, y_training):
         B_scores.append(cross_val_score(clfB, X, y, scoring="accuracy", cv = 10).mean())
         
     
-    
+    # Plot the results if required
+    # Gaussian is red, Multinomial is green, Bernoulli is blue
+    """
     plt.plot(range(iterations), G_scores, 'r', range(iterations), M_scores, 'g', range(iterations), B_scores, 'b')
     plt.xlabel("k for KNN")
     plt.ylabel("accuracy")
     plt.show()
-    
+    """
+    # find the mean score for each classifier
     G_mean = np.mean(G_scores)
     M_mean = np.mean(M_scores)
     B_mean = np.mean(B_scores)
@@ -143,7 +148,7 @@ def build_DT_classifier(X_training, y_training, return_best_max = False):
     @return
 	clf : the classifier built in this function
     '''
-    
+    # Initialise values
     maximum_range = 100
     
     depth_range = range(2, maximum_range)
@@ -153,6 +158,7 @@ def build_DT_classifier(X_training, y_training, return_best_max = False):
     best_max = 2
     max_score = 0;
     
+    # Determine the best max_depth value by testing various values
     for m in depth_range:
         clf = DecisionTreeClassifier(max_depth=m)
 
@@ -165,6 +171,7 @@ def build_DT_classifier(X_training, y_training, return_best_max = False):
 
         max_scores.append(score)
    
+    # Plot the results if required
     """
     plt.plot(depth_range, max_scores)
     plt.xlabel("value of Max Depth")
@@ -175,6 +182,7 @@ def build_DT_classifier(X_training, y_training, return_best_max = False):
     if return_best_max:
         return best_max
     
+    # Return the classifier initialised with the best max_depth value
     clf = DecisionTreeClassifier(max_depth=best_max)
     clf = clf.fit(X_training, y_training)    
 
@@ -197,7 +205,7 @@ def build_NN_classifier(X_training, y_training, return_best_k = False):
 	clf : the classifier built in this function
     '''
       
-    
+    # Initialise values
     max_tests = 60
     k_range = range(1, max_tests)
     
@@ -212,7 +220,9 @@ def build_NN_classifier(X_training, y_training, return_best_k = False):
             best_k = k
             
         k_scores.append(score)
-                    
+    
+    
+    # Plot the results if required
     """
     plt.plot(k_range, k_scores)
     plt.xlabel("Value of k")
@@ -223,6 +233,8 @@ def build_NN_classifier(X_training, y_training, return_best_k = False):
     if return_best_k:
         return best_k
     
+    
+    # Return the classifier initialised with the best k value
     clf = neighbors.KNeighborsClassifier(best_k)
     clf.fit(X_training, y_training)
     return clf
@@ -245,6 +257,7 @@ def build_SVM_classifier(X_training, y_training, return_best_C = False):
     
     print ("--Starting SVC--")
     
+    # Initialise values
     num_tests = 200
     multiplier = 0.5
     c_range = range(1, num_tests)
@@ -262,12 +275,14 @@ def build_SVM_classifier(X_training, y_training, return_best_C = False):
         if score >= c_scores[best_c-1]:
             best_c = c            
         
+        # Add a counter to display progress
         if c % progress_counter == 0:
             print (str((c / num_tests) * 100) + "% complete.",)
     
    
     print ("--Finished SVC--")
 
+    # Plot the results if required
     """
     plt.plot(np.arange(multiplier, num_tests * multiplier, multiplier), c_scores)
     plt.xlabel("Value of C")
@@ -279,9 +294,9 @@ def build_SVM_classifier(X_training, y_training, return_best_C = False):
         return best_c * multiplier
     
     # Note the value generated from this clf may not be the best value found above, due to random generation
+    # Return the classifier initialised with the best C value
     clf = svm.LinearSVC(C=best_c * multiplier)
     clf.fit(X_training, y_training)     
-    
     
     return clf
     
@@ -290,7 +305,16 @@ def build_SVM_classifier(X_training, y_training, return_best_C = False):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def random_permutation(X, y):    
+def random_permutation(X, y):
+    """
+    Generates a random permutation of the inputted data
+    
+    @param
+    X, y is the data being analysed
+    
+    @return
+    A random permutation of the inputted data
+    """
     n = X.shape[0]
     p = np.random.permutation(n)
     
@@ -300,6 +324,13 @@ def random_permutation(X, y):
 
     
 def find_file():
+    """
+    Finds the path to where the data file is stored    
+    
+    @return
+    The file path found
+    """
+    
     script_path = os.path.abspath(__file__)
     script_dir = os.path.split(script_path)[0]
     rel_path = "medical_records.data"
@@ -307,42 +338,72 @@ def find_file():
     
 
 def do_svm(X, y):
+    """
+    Creates a SVM classifier and prints the score found    
+    
+    @param
+    X, y is the data being analysed
+    """
     svm_clf = build_SVM_classifier(X, y)
     svm_score = cross_val_score(svm_clf, X, y, scoring="accuracy", cv = 10).mean()   
     print (svm_score)
-    return svm_clf
-
-
+    
 
 def do_knn(X, y):
+    """
+    Creates a KNN classifier and prints the score found    
+    
+    @param
+    X, y is the data being analysed
+    """
     knn_clf = build_NN_classifier(X, y)
     knn_score = cross_val_score(knn_clf, X, y, scoring="accuracy", cv = 10).mean()  
-    print (knn_score)
-    return knn_clf
-
+    print (knn_score) 
     
 
 def do_nb(X, y):
+    """
+    Creates a NB classifier and prints the score found    
+    
+    @param
+    X, y is the data being analysed
+    """
     nb_clf = build_NB_classifier(X, y)
     nb_score = cross_val_score(nb_clf, X, y, scoring="accuracy", cv = 10).mean()  
     print (nb_score)
-    return nb_clf
+    
 
 def do_dt(X, y):    
+    """
+    Creates a DT classifier and prints the score found    
+    
+    @param
+    X, y is the data being analysed
+    """
     dt_clf = build_DT_classifier(X, y)
     dt_score = cross_val_score(dt_clf, X, y, scoring="accuracy", cv = 10).mean()  
     print (dt_score)
-    return dt_clf
 
 
 def average_best_k(X, y):
+    """
+    Displays a graph of the best k values of a number of
+    permutations of the inputted data, as well as the mean
+    of these best k values
+    
+    @param
+    X, y is the data being analysed
+    """
+    
     iterations = 100
     best_ks = []
     
+    # Find the best k values for a number of permutations
     for i in range(iterations):
         X, y = random_permutation(X, y)
         best_ks.append(build_NN_classifier(X, y, True))
         
+    # Plot the results
     plt.plot(range(iterations), best_ks)
     plt.xlabel("Iteration (100 total)")
     plt.ylabel("Best k for this permutation")
@@ -352,13 +413,23 @@ def average_best_k(X, y):
     
     
 def average_best_C(X, y):
+    """
+    Displays a graph of the best C values of a number of
+    permutations of the inputted data, as well as the mean
+    of these best C values
+    
+    @param
+    X, y is the data being analysed
+    """
     iterations = 50
     best_Cs = []
     
+    # Find the best k values for a number of permutations
     for i in range(iterations):
         X, y = random_permutation(X, y)
         best_Cs.append(build_SVM_classifier(X, y, True))
-        
+    
+    # Plot the results
     plt.plot(range(iterations), best_Cs)
     plt.xlabel("Iteration (50 total)")
     plt.ylabel("Best C for this permutation")
@@ -368,13 +439,23 @@ def average_best_C(X, y):
         
 
 def average_best_max(X, y):
+    """
+    Displays a graph of the best max depth values of a number of
+    permutations of the inputted data, as well as the mean
+    of these best max depth values
+    
+    @param
+    X, y is the data being analysed
+    """
     iterations = 100
     best_maxs = []
     
+    # Find the best max depth values for a number of permutations
     for i in range(iterations):
         X, y = random_permutation(X, y)
         best_maxs.append(build_DT_classifier(X, y, True))
         
+    # Plot the results
     plt.plot(range(iterations), best_maxs)
     plt.xlabel("Iteration (50 total)")
     plt.ylabel("Best max for this permutation")
@@ -384,24 +465,50 @@ def average_best_max(X, y):
 
 
 def classifier_comparison(X, y):
-    iterations = 20
+    """
+    Displays a graph of a comparison between all four classifiers
+    on the same data.
+    A number of permutations are created and tested
+    
+    @param
+    X, y is the data being analysed
+    """
+    
+    # Initialise values
+    iterations = range(10)
     
     knn_scores = []
     svm_scores = []
     nb_scores = []
     dt_scores = []
-
     
-    for i in range(iterations):
+    # test a number of permutations
+    for i in iterations:
+        print (i+1)        
         X, y = random_permutation(X, y)
-        best_maxs.append(build_DT_classifier(X, y, True))
         
-    plt.plot(range(iterations), best_maxs)
-    plt.xlabel("Iteration (50 total)")
-    plt.ylabel("Best max for this permutation")
+        # Build the classifiers with these permutations
+        knn_clf = build_NN_classifier(X, y)      
+        svm_clf = build_SVM_classifier(X, y)      
+        nb_clf = build_NB_classifier(X, y)      
+        dt_clf = build_DT_classifier(X, y)
+        
+        # Score the classifiers
+        knn_scores.append(cross_val_score(knn_clf, X, y, scoring="accuracy", cv = 10).mean())
+        svm_scores.append(cross_val_score(svm_clf, X, y, scoring="accuracy", cv = 10).mean())
+        nb_scores.append(cross_val_score(nb_clf, X, y, scoring="accuracy", cv = 10).mean())
+        dt_scores.append(cross_val_score(dt_clf, X, y, scoring="accuracy", cv = 10).mean())
+
+    # Plot the results
+    # knn is red, svm is green, nb is blue and dt is magenta
+    plt.plot(iterations, knn_scores, 'r', iterations, svm_scores, 'g', iterations, nb_scores, 'b', iterations, dt_scores, 'm')
+    plt.xlabel("Iteration (" + str(len(iterations)) + " total)")
+    plt.ylabel("Cross valued score")
     plt.show()
     
-    print ("The average best max value is:", np.mean(best_maxs))
+    # Display the average scores that each classifier made
+    print ("Averages:\nknn:", np.mean(knn_scores), "\nsvm:", np.mean(svm_scores))
+    print ("nb:", np.mean(nb_scores), "\ndt:", np.mean(dt_scores))
 
     
 if __name__ == "__main__":
@@ -419,14 +526,12 @@ if __name__ == "__main__":
     #do_knn(X, y)
     #do_nb(X, y)
     #do_dt(X, y)
-
     
     #average_best_k(X, y)
     #average_best_C(X, y)
-    average_best_max(X, y)
+    #average_best_max(X, y)
 
-
-    
+    classifier_comparison(X, y)    
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
