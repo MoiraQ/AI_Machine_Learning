@@ -144,8 +144,32 @@ def build_DT_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
-    clf = DecisionTreeClassifier()
+    maximum_range = 200
+    
+    depth_range = range(2, maximum_range)
+    
+    max_scores = []
+    best_max = 2
+    max_score = 0;
+    
+    for m in depth_range:
+        clf = DecisionTreeClassifier(max_depth=m)
+        score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
+        if m > 1 and score >= max_score:
+            best_max = m
+            max_score = score
+
+        max_scores.append(score)
+
+    plt.plot(depth_range, max_scores)
+    plt.xlabel("Max Depth")
+    plt.ylabel("Accuracy")
+    plt.show()
+
+    clf = DecisionTreeClassifier(max_depth=best_max)
     clf = clf.fit(X_training, y_training)
+    
+
     
     return clf
     
