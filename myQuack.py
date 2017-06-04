@@ -144,6 +144,7 @@ def build_DT_classifier(X_training, y_training, return_best_max = False):
     @param 
 	X_training: X_training[i,:] is the ith example
 	y_training: y_training[i] is the class label of X_training[i,:]
+	return_best_max: true to return optimal max depth
 
     @return
 	clf : the classifier built in this function
@@ -200,6 +201,7 @@ def build_NN_classifier(X_training, y_training, return_best_k = False):
     @param 
 	X_training: X_training[i,:] is the ith example
 	y_training: y_training[i] is the class label of X_training[i,:]
+	return_best_k: true to return optimal k value
 
     @return
 	clf : the classifier built in this function
@@ -250,6 +252,7 @@ def build_SVM_classifier(X_training, y_training, return_best_C = False):
     @param 
 	X_training: X_training[i,:] is the ith example
 	y_training: y_training[i] is the class label of X_training[i,:]
+	return_best_C: true to return best C value
 
     @return
 	clf : the classifier built in this function
