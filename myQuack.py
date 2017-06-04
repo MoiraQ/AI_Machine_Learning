@@ -153,7 +153,7 @@ def build_DT_classifier(X_training, y_training):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def build_NN_classifier(X_training, y_training):
+def build_NN_classifier(X_training, y_training, return_best_k = False):
     '''  
     Build a Nearrest Neighbours classifier based on the training set X_training, y_training.
 
@@ -181,14 +181,17 @@ def build_NN_classifier(X_training, y_training):
             
         k_scores.append(score)
                     
-    
+    """
     plt.plot(k_range, k_scores)
-    plt.xlabel("k for KNN")
-    plt.ylabel("accuracy")
+    plt.xlabel("Value of k")
+    plt.ylabel("Cross valued score")
     plt.show()
+    """
     
+    if return_best_k:
+        return best_k
     
-    clf = neighbors.KNeighborsClassifier(best_k-1)
+    clf = neighbors.KNeighborsClassifier(best_k)
     clf.fit(X_training, y_training)
     return clf
     
@@ -274,18 +277,42 @@ def do_svm(X, y):
     svm_clf = build_SVM_classifier(X, y)
     svm_score = cross_val_score(svm_clf, X, y, scoring="accuracy", cv = 10).mean()   
     print (svm_score)
+    return svm_clf
+
 
 
 def do_knn(X, y):
     knn_clf = build_NN_classifier(X, y)
     knn_score = cross_val_score(knn_clf, X, y, scoring="accuracy", cv = 10).mean()  
     print (knn_score)
+    return knn_clf
+
     
 
 def do_nb(X, y):
     nb_clf = build_NB_classifier(X, y)
     nb_score = cross_val_score(nb_clf, X, y, scoring="accuracy", cv = 10).mean()  
     print (nb_score)
+    return nb_clf
+
+
+
+def average_best_k(X, y):
+    iterations = 100
+    best_ks = []
+    
+    for i  in range(iterations):
+        X, y = random_permutation(X, y)
+        best_ks.append(build_NN_classifier(X, y, True))
+        
+    plt.plot(range(iterations), best_ks)
+    plt.xlabel("Iteration (100 total)")
+    plt.ylabel("Best k for this permutation")
+    plt.show()
+    
+    print ("The average best k value is:", np.mean(best_ks))
+        
+
 
     
 if __name__ == "__main__":
@@ -301,7 +328,9 @@ if __name__ == "__main__":
     
     #do_svm(X, y)
     #do_knn(X, y)
-    do_nb(X, y)
+    #do_nb(X, y)
+    
+    average_best_k(X, y)
     
 
 
