@@ -475,7 +475,7 @@ def classifier_comparison(X, y):
     """
     
     # Initialise values
-    iterations = range(10)
+    iterations = range(20)
     
     knn_scores = []
     svm_scores = []
