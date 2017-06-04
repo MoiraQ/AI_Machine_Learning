@@ -88,7 +88,6 @@ def build_NB_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
-    '''
     clfG = GaussianNB()
     clfM = MultinomialNB()
     clfB = BernoulliNB()
@@ -100,28 +99,34 @@ def build_NB_classifier(X_training, y_training):
     iterations = 20
     
     for i in range(iterations):
-        X_training, y_training = random_permutation(X_training, y_training)
-        G_scores.append(cross_val_score(clfG, X_training, y_training, scoring="accuracy", cv = 10).mean())
-        M_scores.append(cross_val_score(clfM, X_training, y_training, scoring="accuracy", cv = 10).mean())
-        B_scores.append(cross_val_score(clfB, X_training, y_training, scoring="accuracy", cv = 10).mean())
+        X, y = random_permutation(X_training, y_training)
+        G_scores.append(cross_val_score(clfG, X, y, scoring="accuracy", cv = 10).mean())
+        M_scores.append(cross_val_score(clfM, X, y, scoring="accuracy", cv = 10).mean())
+        B_scores.append(cross_val_score(clfB, X, y, scoring="accuracy", cv = 10).mean())
+        
     
-    
-    
-    
-    #print ("\nGaussian:", scoreG, "\nMultinomial:", scoreM, "\nBernoulli:", scoreB, "\n")
-    
-    
+    """
     plt.plot(range(iterations), G_scores, 'r', range(iterations), M_scores, 'g', range(iterations), B_scores, 'b')
     plt.xlabel("k for KNN")
     plt.ylabel("accuracy")
     plt.show()
-    '''
+    """
+    G_mean = np.mean(G_scores)
+    M_mean = np.mean(M_scores)
+    B_mean = np.mean(B_scores)
     
+    # return the best classifier
+    if G_mean > max(M_mean, B_mean): 
+        clfG.fit(X_training, y_training)    
+        return clfG
     
-    clfG = GaussianNB()
-
-    clfG.fit(X_training, y_training)    
-    return clfG
+    if M_mean > max(G_mean, B_mean):
+        clfM.fit(X_training, y_training)    
+        return clfM
+    
+    clfB.fit(X_training, y_training)    
+    return clfB
+    
     
     raise NotImplementedError()
 
@@ -138,7 +143,12 @@ def build_DT_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
+    
+    clf = DecisionTreeClassifier()
+    clf = clf.fit(X_training, y_training)
+    
+    return clf
+    
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -272,10 +282,10 @@ def do_knn(X, y):
     print (knn_score)
     
 
-def do_gnb(X, y):
-    gnb_clf = build_NB_classifier(X, y)
-    gnb_score = cross_val_score(gnb_clf, X, y, scoring="accuracy", cv = 10).mean()  
-    print (gnb_score)
+def do_nb(X, y):
+    nb_clf = build_NB_classifier(X, y)
+    nb_score = cross_val_score(nb_clf, X, y, scoring="accuracy", cv = 10).mean()  
+    print (nb_score)
 
     
 if __name__ == "__main__":
@@ -289,9 +299,9 @@ if __name__ == "__main__":
     X, y = prepare_dataset(find_file())   
     X, y = random_permutation(X, y)
     
-    do_svm(X, y)
+    #do_svm(X, y)
     #do_knn(X, y)
-    #do_gnb(X, y)
+    do_nb(X, y)
     
 
 
