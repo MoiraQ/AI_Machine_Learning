@@ -105,12 +105,12 @@ def build_NB_classifier(X_training, y_training):
         B_scores.append(cross_val_score(clfB, X, y, scoring="accuracy", cv = 10).mean())
         
     
-    """
+    
     plt.plot(range(iterations), G_scores, 'r', range(iterations), M_scores, 'g', range(iterations), B_scores, 'b')
     plt.xlabel("k for KNN")
     plt.ylabel("accuracy")
     plt.show()
-    """
+    
     G_mean = np.mean(G_scores)
     M_mean = np.mean(M_scores)
     B_mean = np.mean(B_scores)
@@ -199,7 +199,7 @@ def build_NN_classifier(X_training, y_training, return_best_k = False):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def build_SVM_classifier(X_training, y_training):
+def build_SVM_classifier(X_training, y_training, return_best_C = False):
     '''  
     Build a Support Vector Machine classifier based on the training set X_training, y_training.
 
@@ -233,22 +233,23 @@ def build_SVM_classifier(X_training, y_training):
         if c % progress_counter == 0:
             print (str((c / num_tests) * 100) + "% complete.",)
     
+   
+    print ("--Finished SVC--")
 
-        
-    
-    print (best_c * multiplier)
-        
+    """
     plt.plot(np.arange(multiplier, num_tests * multiplier, multiplier), c_scores)
-    plt.xlabel("C for SVC")
-    plt.ylabel("accuracy")
+    plt.xlabel("Value of C")
+    plt.ylabel("Cross valued score")
     plt.show()
+    """
     
+    if return_best_C:
+        return best_c * multiplier
     
     # Note the value generated from this clf may not be the best value found above, due to random generation
     clf = svm.LinearSVC(C=best_c * multiplier)
     clf.fit(X_training, y_training)     
     
-    print ("--Finished SVC--")
     
     return clf
     
@@ -301,7 +302,7 @@ def average_best_k(X, y):
     iterations = 100
     best_ks = []
     
-    for i  in range(iterations):
+    for i in range(iterations):
         X, y = random_permutation(X, y)
         best_ks.append(build_NN_classifier(X, y, True))
         
@@ -311,6 +312,22 @@ def average_best_k(X, y):
     plt.show()
     
     print ("The average best k value is:", np.mean(best_ks))
+    
+    
+def average_best_C(X, y):
+    iterations = 50
+    best_Cs = []
+    
+    for i in range(iterations):
+        X, y = random_permutation(X, y)
+        best_Cs.append(build_SVM_classifier(X, y, True))
+        
+    plt.plot(range(iterations), best_Cs)
+    plt.xlabel("Iteration (50 total)")
+    plt.ylabel("Best C for this permutation")
+    plt.show()
+    
+    print ("The average best C value is:", np.mean(best_Cs))
         
 
 
@@ -326,11 +343,13 @@ if __name__ == "__main__":
     X, y = prepare_dataset(find_file())   
     X, y = random_permutation(X, y)
     
-    do_svm(X, y)
+    #do_svm(X, y)
     #do_knn(X, y)
-    #do_nb(X, y)
+    do_nb(X, y)
     
     #average_best_k(X, y)
+    #average_best_C(X, y)
+
     
 
 
