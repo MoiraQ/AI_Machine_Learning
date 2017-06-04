@@ -326,11 +326,11 @@ if __name__ == "__main__":
     X, y = prepare_dataset(find_file())   
     X, y = random_permutation(X, y)
     
-    #do_svm(X, y)
+    do_svm(X, y)
     #do_knn(X, y)
     #do_nb(X, y)
     
-    average_best_k(X, y)
+    #average_best_k(X, y)
     
 
 
