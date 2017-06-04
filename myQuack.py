@@ -132,7 +132,7 @@ def build_NB_classifier(X_training, y_training):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def build_DT_classifier(X_training, y_training):
+def build_DT_classifier(X_training, y_training, return_best_max = False):
     '''  
     Build a Decision Tree classifier based on the training set X_training, y_training.
 
@@ -165,14 +165,16 @@ def build_DT_classifier(X_training, y_training):
 
         max_scores.append(score)
    
-
+    """
     plt.plot(depth_range, max_scores)
     plt.xlabel("value of Max Depth")
     plt.ylabel("Cross valued score")
-    plt.show()    
+    plt.show() 
+    """
 
-    print (best_max)
-
+    if return_best_max:
+        return best_max
+    
     clf = DecisionTreeClassifier(max_depth=best_max)
     clf = clf.fit(X_training, y_training)    
 
@@ -365,6 +367,41 @@ def average_best_C(X, y):
     print ("The average best C value is:", np.mean(best_Cs))
         
 
+def average_best_max(X, y):
+    iterations = 100
+    best_maxs = []
+    
+    for i in range(iterations):
+        X, y = random_permutation(X, y)
+        best_maxs.append(build_DT_classifier(X, y, True))
+        
+    plt.plot(range(iterations), best_maxs)
+    plt.xlabel("Iteration (50 total)")
+    plt.ylabel("Best max for this permutation")
+    plt.show()
+    
+    print ("The average best max value is:", np.mean(best_maxs))
+
+
+def classifier_comparison(X, y):
+    iterations = 20
+    
+    knn_scores = []
+    svm_scores = []
+    nb_scores = []
+    dt_scores = []
+
+    
+    for i in range(iterations):
+        X, y = random_permutation(X, y)
+        best_maxs.append(build_DT_classifier(X, y, True))
+        
+    plt.plot(range(iterations), best_maxs)
+    plt.xlabel("Iteration (50 total)")
+    plt.ylabel("Best max for this permutation")
+    plt.show()
+    
+    print ("The average best max value is:", np.mean(best_maxs))
 
     
 if __name__ == "__main__":
@@ -381,11 +418,13 @@ if __name__ == "__main__":
     #do_svm(X, y)
     #do_knn(X, y)
     #do_nb(X, y)
-    do_dt(X, y)
+    #do_dt(X, y)
 
     
     #average_best_k(X, y)
     #average_best_C(X, y)
+    average_best_max(X, y)
+
 
     
 
