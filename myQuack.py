@@ -144,27 +144,33 @@ def build_DT_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     
-    maximum_range = 200
+    maximum_range = 100
     
     depth_range = range(2, maximum_range)
     
     max_scores = []
+    
     best_max = 2
     max_score = 0;
     
     for m in depth_range:
         clf = DecisionTreeClassifier(max_depth=m)
+
         score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
+
         if m > 1 and score >= max_score:
             best_max = m
             max_score = score
 
-        max_scores.append(score)
 
-    plt.plot(depth_range, max_scores)
+        max_scores.append(score)
+   
+
+    plt.plot(depth_range, max_scores, 'r')
     plt.xlabel("Max Depth")
     plt.ylabel("Accuracy")
     plt.show()
+    
 
     clf = DecisionTreeClassifier(max_depth=best_max)
     clf = clf.fit(X_training, y_training)
@@ -320,6 +326,11 @@ def do_nb(X, y):
     print (nb_score)
     return nb_clf
 
+def do_dt(X, y):    
+    dt_clf = build_DT_classifier(X, y)
+    dt_score = cross_val_score(dt_clf, X, y, scoring="accuracy", cv = 10).mean()  
+    print (dt_score)
+    return dt_clf
 
 
 def average_best_k(X, y):
@@ -369,7 +380,9 @@ if __name__ == "__main__":
     
     #do_svm(X, y)
     #do_knn(X, y)
-    do_nb(X, y)
+    #do_nb(X, y)
+    do_dt(X, y)
+
     
     #average_best_k(X, y)
     #average_best_C(X, y)
