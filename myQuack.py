@@ -147,11 +147,26 @@ def build_DT_classifier(X_training, y_training):
     maximum_range = 200
     
     depth_range = range(2, maximum_range)
+    split_range = range(2, maximum_range)
+    permutations = range(1,100)
+
+    split_scores = []
+    best_split = 2
+    split_score = 0;
+    for split in depth_range:
+        clf = DecisionTreeClassifier(min_samples_split=split)
+        score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
+        if score >= split_score:
+            best_split = split
+            split_score = score
+
+        split_scores.append(score)
+        
     
+
     max_scores = []
     best_max = 2
     max_score = 0;
-    
     for m in depth_range:
         clf = DecisionTreeClassifier(max_depth=m)
         score = cross_val_score(clf, X_training, y_training, scoring="accuracy", cv = 10).mean()
@@ -161,10 +176,12 @@ def build_DT_classifier(X_training, y_training):
 
         max_scores.append(score)
 
-    plt.plot(depth_range, max_scores)
-    plt.xlabel("Max Depth")
+    plt.plot(depth_range, max_scores,'r', split_range, split_scores, 'g')
+    plt.xlabel("Split vs Max Depth")
     plt.ylabel("Accuracy")
     plt.show()
+
+    print (average_max)
 
     clf = DecisionTreeClassifier(max_depth=best_max)
     clf = clf.fit(X_training, y_training)
